@@ -218,6 +218,7 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
 
                                 // Remove if unchanged.
                                 if ( $existingBase64image === $base64image ) {
+                                    $entry['file'] = $existingEntry->getFile();
                                     unset( $entry['content'] );
                                     $mediaGalleryEntries[ $k ] = $entry;
                                 }
