@@ -18,6 +18,10 @@
             </group>
             <group id="media_gallery_api" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Media Gallery API</label>
+                <field id="skip_unchanged" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Skip updating image content if existing is the same (compares base64 contents)</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="pass_url" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enable passing URL as base64 data for Media Gallery API</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

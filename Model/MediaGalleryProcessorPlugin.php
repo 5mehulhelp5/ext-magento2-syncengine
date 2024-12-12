@@ -152,6 +152,44 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
             }
         }
 
+        if ( $this->syncengineData->isMediaGalleryApiSkipUnchangedEnabled() ) {
+
+            $existingMediaGallery = $product->getMediaGalleryEntries();
+
+            if ( ! empty( $existingMediaGallery ) ) {
+
+                $existingById = [];
+                foreach ( $existingMediaGallery as $existingMediaGalleryItem ) {
+                    $existingById[ $existingMediaGalleryItem->getId() ] = $existingMediaGalleryItem;
+                }
+
+                foreach ( $mediaGalleryEntries as $k => $entry ) {
+                    $id = $entry['value_id'] ?? null;
+                    if ( ! empty( $id ) ) {
+
+                        // Check if the existing entity has the same image.
+                        if ( isset( $existingById[ $id ] ) ) {
+                            $existingEntry = $existingById[ $id ];
+                            if ( isset( $entry['content'] ) ) {
+                                $base64image = $entry['content']['data'][ImageContentInterface::BASE64_ENCODED_DATA] ?? null;
+                                $existingBase64image = $existingEntry->getContent()?->getBase64EncodedData();
+
+                                if ( empty( $existingBase64image ) ) {
+                                    throw new \Exception( 'SyncEngine: Could not load existing image content: ' . $existingEntry->getFile() );
+                                }
+
+                                // Remove if unchanged.
+                                if ( $existingBase64image === $base64image ) {
+                                    unset( $entry['content'] );
+                                    $mediaGalleryEntries[ $k ] = $entry;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         $returnValue = $proceed($product, $mediaGalleryEntries);
         return $returnValue;
     }

@@ -29,6 +29,11 @@ class Data extends AbstractHelper
         return $this->isMediaGalleryApiPassUrlEnabled() || $this->isMediaGalleryApiPassPathEnabled();
     }
 
+    public function isMediaGalleryApiSkipUnchangedEnabled()
+    {
+        return $this->isEnabled() && $this->getMediaGalleryApiConfig( 'skip_unchanged' );
+    }
+
     public function isMediaGalleryApiPassUrlEnabled()
     {
         return $this->isEnabled() && $this->getMediaGalleryApiConfig( 'pass_url' );
