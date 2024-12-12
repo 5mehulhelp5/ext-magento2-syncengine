@@ -47,6 +47,10 @@ class Data extends AbstractHelper
     public function getMediaGalleryApiBasePath()
     {
         $root = rtrim( BP, '/' ) . '/';
-        return $root . ltrim( $this->getMediaGalleryApiConfig( 'base_path' ), '/' );
+        $path = $this->getMediaGalleryApiConfig( 'base_path' );
+        if ( empty( $path ) ) {
+            $path = 'pub/media/import';
+        }
+        return $root . ltrim( $path, '/' );
     }
 }
