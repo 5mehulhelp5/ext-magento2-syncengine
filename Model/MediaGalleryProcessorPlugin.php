@@ -179,6 +179,7 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
                     ];
                 } else {
                     unset( $entry['content'] );
+                    unset( $entry['file'] );
                 }
 
                 $mediaGalleryEntries[$k] = $entry;
