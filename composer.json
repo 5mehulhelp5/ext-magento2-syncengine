@@ -1,0 +1,19 @@
+{
+  "name": "syncengine/connector",
+  "description": "SyncEngine Magento 2 connector module",
+  "type": "magento2-module",
+  "version": "1.0.0",
+  "license": [],
+  "authors": [
+    {
+      "name": "SyncEngine",
+      "email": "info@syncengine.nl"
+    }
+  ],
+  "autoload": {
+    "files": [ "registration.php" ],
+    "psr-4": {
+      "SyncEngine\\Connector\\": ""
+    }
+  }
+}
