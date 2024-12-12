@@ -1,7 +1,7 @@
 <?php
 /**
- * Orange Cat
- * Copyright (C) 2018 Orange Cat
+ * SyncEngine
+ * Copyright (C) SyncEngine
  *
  * NOTICE OF LICENSE
  *
@@ -18,11 +18,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://opensource.org/licenses/gpl-3.0.html
  *
- * @category Orangecat
- * @package Orangecat_MediaGalleryProcessor
- * @copyright Copyright (c) 2018 Orange Cat
+ * @category SyncEngine
+ * @package SyncEngine_Connector
+ * @copyright Copyright (c) SyncEngine
  * @license http://opensource.org/licenses/gpl-3.0.html GNU General Public License,version 3 (GPL-3.0)
- * @author Oliverio Gombert <olivertar@gmail.com>
+ * @author Jory Hogeveen <info@syncengine.io>
+ * 
+ * Concept of overwriting the MediaGalleryProcessor as a plugin taken from: Orangecat_MediaGalleryProcessor
  */
 
 namespace SyncEngine\Connector\Model;
