@@ -91,6 +91,11 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
         return $imageFactory->create();
     }
 
+    /**
+     * @param $url
+     *
+     * @return ImageContentInterface|null
+     */
     public function fetchImageContentFromUrl( $url )
     {
         if ( ! $this->syncengineData->isMediaGalleryApiPassUrlEnabled() ) {
@@ -109,6 +114,11 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
         return $this->_createImageContent()->setType( $mimeType )->setName( $name )->setBase64EncodedData( $image );
     }
 
+    /**
+     * @param $path
+     *
+     * @return ImageContentInterface|null
+     */
     public function fetchImageContentFromPath( $path )
     {
         if ( ! $this->syncengineData->isMediaGalleryApiPassPathEnabled() ) {
@@ -127,6 +137,11 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
         return $this->_createImageContent()->setType( $mimeType )->setName( $name )->setBase64EncodedData( $image );
     }
 
+    /**
+     * @param $path
+     *
+     * @return ImageContentInterface|null|string
+     */
     public function fetchImageContent( $path_or_url )
     {
         try {
@@ -145,7 +160,7 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
         return $this->fetchImageContentFromUrl( $path_or_url );
     }
 
-    public function aroundProcessMediaGallery(\Magento\Catalog\Model\ProductRepository\MediaGalleryProcessor $subject, \Closure $proceed, $product, $mediaGalleryEntries)
+    public function aroundProcessMediaGallery(\Magento\Catalog\Model\ProductRepository\MediaGalleryProcessor $subject, \Closure $proceed, ProductInterface $product, $mediaGalleryEntries)
     {
         if ( $this->syncengineData?->isMediaGalleryApiEnabled() ) {
             foreach ($mediaGalleryEntries as $k => $entry) {
