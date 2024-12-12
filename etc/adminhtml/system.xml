@@ -19,19 +19,23 @@
             <group id="media_gallery_api" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Media Gallery API</label>
                 <field id="skip_unchanged" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Skip updating image content if existing is the same (compares base64 contents)</label>
+                    <label>Skip existing.</label>
+                    <comment>Prevent duplicate images: This will compare with the existing base64 contents and will keep the existing image if it is the same.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="pass_url" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable passing URL as base64 data for Media Gallery API</label>
+                    <label>Enable image URL processor</label>
+                    <comment>Enable passing URL as base64 data for Media Gallery API</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="pass_path" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable relative path as base64 data for Media Gallery API</label>
+                    <label>Enable image path processor</label>
+                    <comment>Enable relative path as base64 data for Media Gallery API</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="base_path" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>The base path for relative paths in Media Gallery API</label>
+                    <label>Image base path</label>
+                    <comment>The base path for relative image paths passed to the Media Gallery API. Default: "/pub/media/import"</comment>
                 </field>
             </group>
         </section>
