@@ -74,7 +74,7 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
 
     public function fetchImageContentFromUrl( $url )
     {
-        if ( ! $this->syncengineData->isMediaApiPassUrlEnabled() ) {
+        if ( ! $this->syncengineData->isMediaGalleryApiPassUrlEnabled() ) {
             return null;
         }
 
@@ -92,11 +92,11 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
 
     public function fetchImageContentFromPath( $path )
     {
-        if ( ! $this->syncengineData->isMediaApiPassPathEnabled() ) {
+        if ( ! $this->syncengineData->isMediaGalleryApiPassPathEnabled() ) {
             return null;
         }
 
-        $base = $this->syncengineData->getMediaApiBasePath();
+        $base = $this->syncengineData->getMediaGalleryApiBasePath();
         $base = rtrim( $base, '/' ) . '/';
 
         $file = $base . ltrim( $path, '/' );
@@ -128,7 +128,7 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
 
     public function aroundProcessMediaGallery(\Magento\Catalog\Model\ProductRepository\MediaGalleryProcessor $subject, \Closure $proceed, $product, $mediaGalleryEntries)
     {
-        if ( $this->syncengineData?->isMediaApiEnabled() ) {
+        if ( $this->syncengineData?->isMediaGalleryApiEnabled() ) {
             foreach ($mediaGalleryEntries as $k => $entry) {
                 $base64image = $entry['content']['data'][ImageContentInterface::BASE64_ENCODED_DATA] ?? null;
 

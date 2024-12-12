@@ -16,18 +16,18 @@
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                 </field>
             </group>
-            <group id="media_api" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
-                <label>Media API</label>
+            <group id="media_gallery_api" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Media Gallery API</label>
                 <field id="pass_url" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable passing URL as base64 data for media API</label>
+                    <label>Enable passing URL as base64 data for Media Gallery API</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="pass_path" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable relative path as base64 data for media API</label>
+                    <label>Enable relative path as base64 data for Media Gallery API</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="base_path" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>The base path for relative paths in media API</label>
+                    <label>The base path for relative paths in Media Gallery API</label>
                 </field>
             </group>
         </section>

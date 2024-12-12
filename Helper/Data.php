@@ -14,28 +14,33 @@ class Data extends AbstractHelper
         return $this->scopeConfig->getValue( self::XML_CONFIG_PATH . '/'. $setting );
     }
 
+    public function getMediaGalleryApiConfig( $setting )
+    {
+        return $this->getConfig( 'media_gallery_api/' . $setting );
+    }
+
     public function isEnabled()
     {
         return $this->getConfig( 'general/enable' );
     }
 
-    public function isMediaApiEnabled()
+    public function isMediaGalleryApiEnabled()
     {
-        return $this->isMediaApiPassUrlEnabled() || $this->isMediaApiPassPathEnabled();
+        return $this->isMediaGalleryApiPassUrlEnabled() || $this->isMediaGalleryApiPassPathEnabled();
     }
 
-    public function isMediaApiPassUrlEnabled()
+    public function isMediaGalleryApiPassUrlEnabled()
     {
-        return $this->isEnabled() && $this->getConfig( 'media_api/pass_url' );
+        return $this->isEnabled() && $this->getMediaGalleryApiConfig( 'pass_url' );
     }
 
-    public function isMediaApiPassPathEnabled()
+    public function isMediaGalleryApiPassPathEnabled()
     {
-        return $this->isEnabled() && $this->getConfig( 'media_api/pass_path' );
+        return $this->isEnabled() && $this->getMediaGalleryApiConfig( 'pass_path' );
     }
 
-    public function getMediaApiBasePath()
+    public function getMediaGalleryApiBasePath()
     {
-        return $this->getConfig( 'media_api/base_path' );
+        return $this->getMediaGalleryApiConfig( 'base_path' );
     }
 }
