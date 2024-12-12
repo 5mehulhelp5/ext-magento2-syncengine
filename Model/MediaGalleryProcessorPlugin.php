@@ -27,6 +27,7 @@
 
 namespace SyncEngine\Connector\Model;
 
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product\Gallery\DeleteValidator;
 use Magento\Catalog\Model\Product\Gallery\Processor;
 use Magento\Customer\Api\AccountManagementCustomAttributesTest;
@@ -34,15 +35,20 @@ use Magento\Framework\Api\Data\ImageContentInterface;
 use Magento\Framework\Api\Data\ImageContentInterfaceFactory;
 use Magento\Catalog\Model\ProductRepository\MediaGalleryProcessor;
 use Magento\Framework\Api\ImageProcessorInterface;
+use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Filesystem;
 use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\Api\ImageContentFactory;
 use SyncEngine\Connector\Helper\Data;
+use Magento\Catalog\Model\Product\Media\ConfigInterface;
 
 class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductRepository\MediaGalleryProcessor
 {
     private Data $syncengineData;
     private ObjectManager $objectManager;
+    private ConfigInterface $mediaConfig;
+    private Filesystem $filesystem;
 
     /**
      * @param Processor $processor
@@ -61,6 +67,19 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
         $this->syncengineData = $this->objectManager->get(Data::class);
 
         parent::__construct($processor, $contentFactory, $imageProcessor, $deleteValidator);
+    }
+
+    public function _getProductMediaPath( $path ): string
+    {
+        if ( ! isset( $this->mediaConfig ) ) {
+            $this->mediaConfig = $this->objectManager->get( ConfigInterface::class );
+        }
+        if ( ! isset( $this->filesystem ) ) {
+            $this->filesystem = $this->objectManager->get(Filesystem::class);
+        }
+
+        $dir = $this->filesystem->getDirectoryRead( DirectoryList::MEDIA );
+        return $dir->getAbsolutePath( $this->mediaConfig->getMediaPath( $path ) );
     }
 
     /**
@@ -175,7 +194,12 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
                                 $existingBase64image = $existingEntry->getContent()?->getBase64EncodedData();
 
                                 if ( empty( $existingBase64image ) ) {
-                                    throw new \Exception( 'SyncEngine: Could not load existing image content: ' . $existingEntry->getFile() );
+                                    $path = $this->_getProductMediaPath( $existingEntry->getFile() );
+                                    $existingBase64image = base64_encode( file_get_contents( $path ) );
+                                }
+
+                                if ( empty( $existingBase64image ) ) {
+                                    throw new \Exception( 'SyncEngine: Could not load existing image content: ' . $path );
                                 }
 
                                 // Remove if unchanged.
