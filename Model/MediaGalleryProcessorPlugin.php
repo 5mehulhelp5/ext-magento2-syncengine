@@ -41,8 +41,8 @@ use SyncEngine\Connector\Helper\Data;
 
 class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductRepository\MediaGalleryProcessor
 {
-    private $syncengineData = null;
-    private ?ObjectManager $objectManager = null;
+    private Data $syncengineData;
+    private ObjectManager $objectManager;
 
     /**
      * @param Processor $processor
@@ -66,7 +66,7 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
     /**
      * @return ImageContentInterface
      */
-    public function _createImage()
+    public function _createImageContent()
     {
         $imageFactory = $this->objectManager->create(\Magento\Framework\Api\ImageContentFactory::class);
         return $imageFactory->create();
@@ -82,12 +82,12 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
         $curl = $this->objectManager->create(Curl::class);
         $curl->get( $url );
 
-        $name = pathinfo( $url, PATHINFO_FILENAME );
-        $image = base64_encode( $curl->getBody() );
-        $headers = $curl->getHeaders();
+        $name     = pathinfo( $url, PATHINFO_FILENAME );
+        $image    = base64_encode( $curl->getBody() );
+        $headers  = $curl->getHeaders();
         $mimeType = $headers['Content-Type'] ?? $headers['content-type'] ?? $headers['Content_Type'] ?? $headers['content_type'];
 
-        return $this->_createImage()->setType( $mimeType )->setName( $name )->setBase64EncodedData( $image );
+        return $this->_createImageContent()->setType( $mimeType )->setName( $name )->setBase64EncodedData( $image );
     }
 
     public function fetchImageContentFromPath( $path )
@@ -101,11 +101,11 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
 
         $file = $base . ltrim( $path, '/' );
 
-        $name = pathinfo( $file, PATHINFO_FILENAME );
+        $name     = pathinfo( $file, PATHINFO_FILENAME );
+        $image    = base64_encode( file_get_contents( $file ) );
         $mimeType = mime_content_type( $file );
-        $image = base64_encode( file_get_contents( $file ) );
 
-        return $this->_createImage()->setType( $mimeType )->setName( $name )->setBase64EncodedData( $image );
+        return $this->_createImageContent()->setType( $mimeType )->setName( $name )->setBase64EncodedData( $image );
     }
 
     public function fetchImageContent( $path_or_url )
