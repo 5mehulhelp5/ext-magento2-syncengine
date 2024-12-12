@@ -145,8 +145,7 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
     public function fetchImageContent( $path_or_url )
     {
         try {
-            $path = pathinfo( $path_or_url );
-            if ( empty( $path['extension'] ) ) {
+            if ( ! pathinfo( $path_or_url, PATHINFO_EXTENSION ) ) {
                 return $path_or_url;
             }
         } catch ( \Exception $e ) {
