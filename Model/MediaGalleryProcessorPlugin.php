@@ -23,7 +23,7 @@
  * @copyright Copyright (c) SyncEngine
  * @license http://opensource.org/licenses/gpl-3.0.html GNU General Public License,version 3 (GPL-3.0)
  * @author Jory Hogeveen <info@syncengine.io>
- * 
+ *
  * Concept of overwriting the MediaGalleryProcessor as a plugin taken from: Orangecat_MediaGalleryProcessor
  */
 
@@ -170,7 +170,7 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
 
                 $imageContent = $this->fetchImageContent( $entry['file'] );
 
-                if ( $imageContent ) {
+                if ( $imageContent instanceof ImageContentInterface ) {
                     $entry['content']['data'] = [
                         ImageContentInterface::BASE64_ENCODED_DATA => $imageContent->getBase64EncodedData(),
                         ImageContentInterface::TYPE => $imageContent->getType(),
@@ -205,7 +205,10 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
                             $existingEntry = $existingById[ $id ];
                             if ( isset( $entry['content'] ) ) {
                                 $base64image = $entry['content']['data'][ImageContentInterface::BASE64_ENCODED_DATA] ?? null;
-                                $existingBase64image = $existingEntry->getContent()?->getBase64EncodedData();
+                                $existingEntryContent = $existingEntry->getContent();
+                                if ( $existingEntryContent instanceof ImageContentInterface ) {
+                                    $existingBase64image = $existingEntryContent->getBase64EncodedData();
+                                }
 
                                 if ( empty( $existingBase64image ) ) {
                                     $path = $this->_getProductMediaPath( $existingEntry->getFile() );
