@@ -32,20 +32,19 @@ namespace SyncEngine\Connector\Model;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product\Gallery\DeleteValidator;
 use Magento\Catalog\Model\Product\Gallery\Processor;
-use Magento\Customer\Api\AccountManagementCustomAttributesTest;
+use Magento\Catalog\Model\Product\Media\ConfigInterface;
+use Magento\Catalog\Model\ProductRepository\MediaGalleryProcessor;
 use Magento\Framework\Api\Data\ImageContentInterface;
 use Magento\Framework\Api\Data\ImageContentInterfaceFactory;
-use Magento\Catalog\Model\ProductRepository\MediaGalleryProcessor;
+use Magento\Framework\Api\ImageContentFactory;
 use Magento\Framework\Api\ImageProcessorInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Filesystem;
 use Magento\Framework\HTTP\Client\Curl;
-use Magento\Framework\Api\ImageContentFactory;
 use SyncEngine\Connector\Helper\Data;
-use Magento\Catalog\Model\Product\Media\ConfigInterface;
 
-class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductRepository\MediaGalleryProcessor
+class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
 {
     private Data $syncengineData;
     private ObjectManager $objectManager;
@@ -89,7 +88,7 @@ class MediaGalleryProcessorPlugin extends \Magento\Catalog\Model\ProductReposito
      */
     public function _createImageContent()
     {
-        $imageFactory = $this->objectManager->create(\Magento\Framework\Api\ImageContentFactory::class);
+        $imageFactory = $this->objectManager->create( ImageContentFactory::class );
         return $imageFactory->create();
     }
 

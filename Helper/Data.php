@@ -26,10 +26,8 @@
  */
 
 namespace SyncEngine\Connector\Helper;
-use Magento\Store\Model\ScopeInterface;
-use Magento\Framework\App\ObjectManager;
-use Magento\Framework\App\Helper\AbstractHelper;
 
+use Magento\Framework\App\Helper\AbstractHelper;
 
 class Data extends AbstractHelper
 {
