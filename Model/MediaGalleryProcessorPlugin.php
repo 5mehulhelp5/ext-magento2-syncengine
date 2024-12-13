@@ -51,12 +51,6 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
     private ConfigInterface $mediaConfig;
     private Filesystem $filesystem;
 
-    /**
-     * @param Processor $processor
-     * @param ImageContentInterfaceFactory $contentFactory
-     * @param ImageProcessorInterface $imageProcessor
-     * @param DeleteValidator|null $deleteValidator
-     */
     public function __construct(
         Processor $processor,
         ImageContentInterfaceFactory $contentFactory,
@@ -160,8 +154,12 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
         return $this->fetchImageContentFromUrl( $path_or_url );
     }
 
-    public function aroundProcessMediaGallery(\Magento\Catalog\Model\ProductRepository\MediaGalleryProcessor $subject, \Closure $proceed, ProductInterface $product, $mediaGalleryEntries)
-    {
+    public function aroundProcessMediaGallery(
+        MediaGalleryProcessor $subject,
+        \Closure $proceed,
+        ProductInterface $product,
+        $mediaGalleryEntries
+    ) {
         if ( $this->syncengineData?->isMediaGalleryApiEnabled() ) {
             foreach ($mediaGalleryEntries as $k => $entry) {
                 $base64image = $entry['content']['data'][ImageContentInterface::BASE64_ENCODED_DATA] ?? null;
