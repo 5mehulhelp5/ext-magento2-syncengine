@@ -29,6 +29,7 @@
 
 namespace SyncEngine\Connector\Model;
 
+use Magento\Catalog\Api\Data\ProductAttributeMediaGalleryEntryInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product\Gallery\DeleteValidator;
 use Magento\Catalog\Model\Product\Gallery\Processor;
@@ -154,6 +155,33 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
         return $this->fetchImageContentFromUrl( $path_or_url );
     }
 
+    /**
+     * @throws \Exception
+     *
+     * @param ProductAttributeMediaGalleryEntryInterface $entry
+     */
+    public function fetchProductImageContent( $entry ): ?string
+    {
+        $existingEntryContent = $entry->getContent();
+
+        if ( $existingEntryContent instanceof ImageContentInterface ) {
+            $existingBase64image = $existingEntryContent->getBase64EncodedData();
+        } elseif ( is_scalar( $existingEntryContent ) ) {
+            throw new \Exception( 'SyncEngine: Existing content: ' . substr( (string) $existingEntryContent, 0, 20 ) );
+        }
+
+        if ( empty( $existingBase64image ) ) {
+            $path = $this->_getProductMediaPath( $entry->getFile() );
+            $existingBase64image = base64_encode( file_get_contents( $path ) );
+        }
+
+        if ( empty( $existingBase64image ) ) {
+            throw new \Exception( 'SyncEngine: Could not load existing image content: ' . $path );
+        }
+
+        return $existingBase64image;
+    }
+
     public function aroundProcessMediaGallery(
         MediaGalleryProcessor $subject,
         \Closure $proceed,
@@ -192,41 +220,58 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
             if ( ! empty( $existingMediaGallery ) ) {
 
                 $existingById = [];
+                $existingBase64images = [];
+
                 foreach ( $existingMediaGallery as $existingMediaGalleryItem ) {
                     $existingById[ $existingMediaGalleryItem->getId() ] = $existingMediaGalleryItem;
                 }
 
+                $getExistingImageContent = function( $id = null ) use ( &$existingById, &$existingBase64images ) {
+                    if ( ! empty( $existingBase64images[ $id ] ) ) {
+                        return $existingBase64images[ $id ];
+                    }
+                    if ( empty( $existingById[ $id ] ) ) {
+                        return null;
+                    }
+                    $existingBase64images[ $id ] = $this->fetchProductImageContent( $existingById[ $id ] );
+                    return $existingBase64images[ $id ];
+                };
+
+                $imageContentExists = function( $content, $id = null ) use ( &$existingById, &$existingBase64images, $getExistingImageContent ) {
+                    if ( $id ) {
+                        return $content === $getExistingImageContent( $id ) ? $id : false;
+                    }
+                    foreach ( $existingById as $id => $existingImage ) {
+                        if ( empty( $existingBase64images[ $id ] ) ) {
+                            $getExistingImageContent( $id );
+                        }
+                        if ( $content === $existingBase64images[ $id ] ?? null ) {
+                            return $id;
+                        }
+                    }
+                    return false;
+                };
+
                 foreach ( $mediaGalleryEntries as $k => $entry ) {
                     $id = $entry['value_id'] ?? null;
-                    if ( ! empty( $id ) ) {
 
-                        // Check if the existing entity has the same image.
-                        if ( isset( $existingById[ $id ] ) ) {
-                            $existingEntry = $existingById[ $id ];
-                            if ( isset( $entry['content'] ) ) {
-                                $base64image = $entry['content']['data'][ImageContentInterface::BASE64_ENCODED_DATA] ?? null;
-                                $existingEntryContent = $existingEntry->getContent();
-                                if ( $existingEntryContent instanceof ImageContentInterface ) {
-                                    $existingBase64image = $existingEntryContent->getBase64EncodedData();
-                                }
+                    if ( empty( $entry['content'] ) ) {
+                        continue;
+                    }
 
-                                if ( empty( $existingBase64image ) ) {
-                                    $path = $this->_getProductMediaPath( $existingEntry->getFile() );
-                                    $existingBase64image = base64_encode( file_get_contents( $path ) );
-                                }
+                    $base64image = $entry['content']['data'][ImageContentInterface::BASE64_ENCODED_DATA] ?? null;
 
-                                if ( empty( $existingBase64image ) ) {
-                                    throw new \Exception( 'SyncEngine: Could not load existing image content: ' . $path );
-                                }
+                    if ( empty( $base64image ) ) {
+                        continue;
+                    }
 
-                                // Remove if unchanged.
-                                if ( $existingBase64image === $base64image ) {
-                                    $entry['file'] = $existingEntry->getFile();
-                                    unset( $entry['content'] );
-                                    $mediaGalleryEntries[ $k ] = $entry;
-                                }
-                            }
-                        }
+                    $exists = $imageContentExists( $base64image, $id );
+
+                    if ( $exists ) {
+                        unset( $entry['content'] ); // Remove base64 content.
+                        $entry['file'] = $existingById[ $exists ]->getFile();
+                        $entry['value_id'] = $exists;
+                        $mediaGalleryEntries[ $k ] = $entry;
                     }
                 }
             }
