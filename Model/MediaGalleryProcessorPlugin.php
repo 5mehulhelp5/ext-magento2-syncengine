@@ -66,16 +66,21 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
         parent::__construct($processor, $contentFactory, $imageProcessor, $deleteValidator);
     }
 
+    public function _getFilesystem(): Filesystem
+    {
+        if ( ! isset( $this->filesystem ) ) {
+            $this->filesystem = $this->objectManager->get( Filesystem::class );
+        }
+        return $this->filesystem;
+    }
+
     public function _getProductMediaPath( $path ): string
     {
         if ( ! isset( $this->mediaConfig ) ) {
             $this->mediaConfig = $this->objectManager->get( ConfigInterface::class );
         }
-        if ( ! isset( $this->filesystem ) ) {
-            $this->filesystem = $this->objectManager->get(Filesystem::class);
-        }
 
-        $dir = $this->filesystem->getDirectoryRead( DirectoryList::MEDIA );
+        $dir = $this->_getFilesystem()->getDirectoryRead( DirectoryList::MEDIA );
         return $dir->getAbsolutePath( $this->mediaConfig->getMediaPath( $path ) );
     }
 
@@ -135,14 +140,25 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
         $base = rtrim( $base, '/' ) . '/';
 
         $file = $base . ltrim( $path, '/' );
+        $fs = $this->objectManager->get( Filesystem\DriverInterface::class );
 
-        if ( ! file_exists( $file ) ) {
+        if ( ! $fs->exists( $file ) ) {
             throw new InputException( __( 'SyncEngine: File does not exist: ' . $file ) );
         }
 
-        $name     = pathinfo( $file, PATHINFO_FILENAME );
-        $image    = base64_encode( file_get_contents( $file ) );
-        $mimeType = mime_content_type( $file );
+        $message = '';
+        try {
+            $name     = pathinfo( $file, PATHINFO_FILENAME );
+            $image    = base64_encode( $fs->fileGetContents( $file ) );
+            $mimeType = mime_content_type( $file );
+        } catch ( InputException $e ) {
+            $message = $e->getMessage();
+            $image = null;
+        }
+
+        if ( empty( $image ) ) {
+            throw new InputException( __( 'SyncEngine: Could not parse file: ' . $file . ' | Message:' . $message ) );
+        }
 
         return $this->_createImageContent()->setType( $mimeType )->setName( $name )->setBase64EncodedData( $image );
     }
