@@ -142,7 +142,7 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
         $file = $base . ltrim( $path, '/' );
         $fs = $this->objectManager->get( Filesystem\DriverInterface::class );
 
-        if ( ! $fs->exists( $file ) ) {
+        if ( ! $fs->isFile( $file ) ) {
             throw new InputException( __( 'SyncEngine: File does not exist: ' . $file ) );
         }
 
