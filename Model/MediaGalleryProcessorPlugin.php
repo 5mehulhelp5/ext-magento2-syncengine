@@ -103,10 +103,19 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
         $curl = $this->objectManager->create(Curl::class);
         $curl->get( $url );
 
-        $name     = pathinfo( $url, PATHINFO_FILENAME );
-        $image    = base64_encode( $curl->getBody() );
+        if ( 400 <= (int) $curl->getStatus() ) {
+            throw new InputException( __( 'SyncEngine: URL not found: STATUS:' . $curl->getStatus() . ' | URL: ' . $url ) );
+        }
+
         $headers  = $curl->getHeaders();
         $mimeType = $headers['Content-Type'] ?? $headers['content-type'] ?? $headers['Content_Type'] ?? $headers['content_type'];
+
+        if ( ! str_starts_with( $mimeType, 'image/' ) ) {
+            throw new InputException( __( 'SyncEngine: URL not a file: ' . $url ) );
+        }
+
+        $name     = pathinfo( $url, PATHINFO_FILENAME );
+        $image    = base64_encode( $curl->getBody() );
 
         return $this->_createImageContent()->setType( $mimeType )->setName( $name )->setBase64EncodedData( $image );
     }
@@ -126,6 +135,10 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
         $base = rtrim( $base, '/' ) . '/';
 
         $file = $base . ltrim( $path, '/' );
+
+        if ( ! file_exists( $file ) ) {
+            throw new InputException( __( 'SyncEngine: File does not exist: ' . $file ) );
+        }
 
         $name     = pathinfo( $file, PATHINFO_FILENAME );
         $image    = base64_encode( file_get_contents( $file ) );
@@ -173,7 +186,9 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
 
         if ( empty( $existingBase64image ) ) {
             $path = $this->_getProductMediaPath( $entry->getFile() );
-            $existingBase64image = base64_encode( file_get_contents( $path ) );
+            if ( file_exists( $path ) ) {
+                $existingBase64image = base64_encode( file_get_contents( $path ) );
+            }
         }
 
         if ( empty( $existingBase64image ) ) {
@@ -213,6 +228,8 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
                 $mediaGalleryEntries[$k] = $entry;
             }
         }
+
+        $debug = [];
 
         if ( $this->syncengineData->isMediaGalleryApiSkipUnchangedEnabled() ) {
 
@@ -260,6 +277,10 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
                         continue;
                     }
 
+                    if ( $id && empty( $existingById[ $id ] ) ) {
+                        $debug[] = 'Non-existing Image Entry Id: ' . $id;
+                    }
+
                     $base64image = $entry['content']['data'][ImageContentInterface::BASE64_ENCODED_DATA] ?? null;
 
                     if ( empty( $base64image ) ) {
@@ -272,11 +293,25 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
                         unset( $entry['content'] ); // Remove base64 content.
                         $entry['file'] = $existingById[ $exists ]->getFile();
                         $entry['value_id'] = $exists;
+                        // @todo Keep existing types.
+                        /*if ( empty( $entry['types'] ) ) {
+                            $entry['types'] = $existingById[ $exists ]->getTypes();
+                        }*/
                         $mediaGalleryEntries[ $k ] = $entry;
+
+                        $debug[] = 'Existing Image: ' . $exists;
+                    } else {
+                        $debug[] = 'Override: ' . ( $id ?? $exists ?? '' ) . ' | ' . ( $entry['file'] ?? '' );
                     }
                 }
+
+                $debug[] = 'Total existing content: ' . count( $existingBase64images );
+
+            } else {
+                $debug[] = 'Empty existing: ';
             }
         }
+        //throw new \Exception( json_encode( $debug ) );
 
         $returnValue = $proceed($product, $mediaGalleryEntries);
         return $returnValue;
