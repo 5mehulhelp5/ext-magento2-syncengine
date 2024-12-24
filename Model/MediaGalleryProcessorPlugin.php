@@ -41,6 +41,7 @@ use Magento\Framework\Api\ImageContentFactory;
 use Magento\Framework\Api\ImageProcessorInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Exception\InputException;
 use Magento\Framework\Filesystem;
 use Magento\Framework\HTTP\Client\Curl;
 use SyncEngine\Connector\Helper\Data;
@@ -167,7 +168,7 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
         if ( $existingEntryContent instanceof ImageContentInterface ) {
             $existingBase64image = $existingEntryContent->getBase64EncodedData();
         } elseif ( is_scalar( $existingEntryContent ) ) {
-            throw new \Exception( 'SyncEngine: Existing content: ' . substr( (string) $existingEntryContent, 0, 20 ) );
+            throw new InputException( __( 'SyncEngine: Existing content: ' . substr( (string) $existingEntryContent, 0, 20 ) ) );
         }
 
         if ( empty( $existingBase64image ) ) {
@@ -176,7 +177,7 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
         }
 
         if ( empty( $existingBase64image ) ) {
-            throw new \Exception( 'SyncEngine: Could not load existing image content: ' . $path );
+            throw new InputException(  __( 'SyncEngine: Could not load existing image content: ID:' . $entry->getId() . ' | FILE:'. $entry->getFile() ) );
         }
 
         return $existingBase64image;
