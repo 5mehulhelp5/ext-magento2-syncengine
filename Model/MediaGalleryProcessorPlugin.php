@@ -93,6 +93,18 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
         return $imageFactory->create();
     }
 
+
+    /**
+     * Fix Magento 2 bug: Dots are not supported in filenames.
+     * Report: https://github.com/magento/magento2/issues/39505
+     */
+    public function parseFilename( string $file ): string
+    {
+        $name      = pathinfo( $file, PATHINFO_FILENAME );
+        $extension = pathinfo( $file, PATHINFO_EXTENSION );
+        return str_replace( '.', '', $name ) . '.' . $extension;
+    }
+
     /**
      * @param $url
      *
@@ -119,8 +131,8 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
             throw new InputException( __( 'SyncEngine: URL not a file: ' . $url ) );
         }
 
-        $name     = pathinfo( $url, PATHINFO_FILENAME );
-        $image    = base64_encode( $curl->getBody() );
+        $name  = $this->parseFilename( $url );
+        $image = base64_encode( $curl->getBody() );
 
         return $this->_createImageContent()->setType( $mimeType )->setName( $name )->setBase64EncodedData( $image );
     }
@@ -148,7 +160,7 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
 
         $message = '';
         try {
-            $name     = pathinfo( $file, PATHINFO_FILENAME );
+            $name     = $this->parseFilename( $file );
             $image    = base64_encode( $fs->fileGetContents( $file ) );
             $mimeType = mime_content_type( $file );
         } catch ( InputException $e ) {
