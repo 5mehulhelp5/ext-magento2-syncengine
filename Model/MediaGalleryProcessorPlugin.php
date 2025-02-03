@@ -265,8 +265,15 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
 
             if ( ! empty( $existingMediaGallery ) ) {
 
+                $updatesById = [];
                 $existingById = [];
                 $existingBase64images = [];
+
+                foreach ( $mediaGalleryEntries as $inputIndex => $mediaGalleryEntry ) {
+                    if ( isset( $mediaGalleryEntry[ 'value_id' ] ) ) {
+                        $updatesById[ $mediaGalleryEntry[ 'value_id' ] ] = $inputIndex;
+                    }
+                }
 
                 foreach ( $existingMediaGallery as $existingMediaGalleryItem ) {
                     $existingById[ $existingMediaGalleryItem->getId() ] = $existingMediaGalleryItem;
@@ -318,16 +325,25 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
                     $exists = $imageContentExists( $base64image, $id );
 
                     if ( $exists ) {
-                        unset( $entry['content'] ); // Remove base64 content.
-                        $entry['file'] = $existingById[ $exists ]->getFile();
-                        $entry['value_id'] = $exists;
-                        // @todo Keep existing types.
-                        /*if ( empty( $entry['types'] ) ) {
-                            $entry['types'] = $existingById[ $exists ]->getTypes();
-                        }*/
-                        $mediaGalleryEntries[ $k ] = $entry;
 
-                        $debug[] = 'Existing Image: ' . $exists;
+                        if ( isset( $updatesById[ $exists ] ) && $k !== $updatesById[ $exists ] ) {
+                            // Duplicate entry.
+                            unset( $mediaGalleryEntries[ $k ] );
+                            $debug[] = 'Duplicate Existing image: ' . $exists;
+                        } else {
+
+                            unset( $entry['content'] ); // Remove base64 content.
+                            $entry['file'] = $existingById[ $exists ]->getFile();
+                            $entry['value_id'] = $exists;
+                            // @todo Keep existing types.
+                            /*if ( empty( $entry['types'] ) ) {
+                                $entry['types'] = $existingById[ $exists ]->getTypes();
+                            }*/
+                            $mediaGalleryEntries[ $k ] = $entry;
+
+                            $debug[] = 'Existing Image: ' . $exists;
+                        }
+
                     } else {
                         $debug[] = 'Override: ' . ( $id ?? $exists ?? '' ) . ' | ' . ( $entry['file'] ?? '' );
                     }
