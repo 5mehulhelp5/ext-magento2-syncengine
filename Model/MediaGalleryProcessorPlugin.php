@@ -345,6 +345,11 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
                         }
 
                     } else {
+
+                        // Non-existing images cannot have a value ID.
+                        unset( $entry['value_id'] );
+                        $mediaGalleryEntries[ $k ] = $entry;
+
                         $debug[] = 'Override: ' . ( $id ?? $exists ?? '' ) . ' | ' . ( $entry['file'] ?? '' );
                     }
                 }
