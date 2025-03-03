@@ -360,7 +360,7 @@ class MediaGalleryProcessorPlugin extends MediaGalleryProcessor
                 $debug[] = 'Empty existing: ';
             }
         }
-        //throw new \Exception( json_encode( $debug ) );
+        //throw new InputException( __( json_encode( $mediaGalleryEntries ) ) );
 
         $returnValue = $proceed($product, $mediaGalleryEntries);
         return $returnValue;
