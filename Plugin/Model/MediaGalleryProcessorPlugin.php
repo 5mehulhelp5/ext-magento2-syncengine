@@ -27,7 +27,7 @@
  * Concept of overwriting the MediaGalleryProcessor as a plugin taken from: Orangecat_MediaGalleryProcessor
  */
 
-namespace SyncEngine\Connector\Model;
+namespace SyncEngine\Connector\Plugin\Model;
 
 use Magento\Catalog\Api\Data\ProductAttributeMediaGalleryEntryInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
